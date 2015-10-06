@@ -1,34 +1,43 @@
-s = serial('/dev/ttyS0');
-fopen(s);
 turn(s,4,4);
 path_clear = 1;
 low_threshold = 50;
 high_threshold = 75;
 av_sensors = zeros(1,8);
 while path_clear
-    sensors = readIR(s);
-    av_sensors = (9*av_sensors + sensors)/10;
-    av_sensors
+    [sensors,av_sensors] = readIRAV(s,av_sensors);
     if (av_sensors(3) > high_threshold || av_sensors(4) > high_threshold)
         path_clear = 0;
     end
 end
 
 while true
-    sensors = readIR(s);
-    av_sensors = (9*av_sensors + sensors)/10;
-    av_sensors
+    [sensors,av_sensors] = readIRAV(s,av_sensors);
     % too close to the wall
-    if (av_sensors(3) > high_threshold || av_sensors(5) > high_threshold*1.5)
+    if (av_sensors(5) > high_threshold*1.5)
+        sharpness = calculateTurn(av_sensors(5),high_threshold*1.5,high_threshold*1.5*2);
+        if (sum(speed == [sharpness,6] < 1))
+            speed = [sharpness,4];
+            turn(s,sharpness,4);
+        end
+    elseif (av_sensors(3) > high_threshold || av_sensors(4) > high_threshold)
         % left
-        turn(s,-4,4)
+        speed = [-4,4];
+        turn(s,-4,4);
+    
     % too far away from the wall
     elseif (av_sensors(6) < low_threshold*1.5)
         % right
-        turn(s,4,-4)
+        sharpness = calculateTurn(av_sensors(6),0,low_threshold*1.5);
+        if (sum(speed == [4,sharpness] < 1))
+            speed = [4,sharpness];
+            turn(s,4,sharpness);
+        end
     % keep straight
     else
-        turn(s,4,4)
+        if (sum(speed == [4,4] < 1))
+            speed = [4,4];
+            turn(s,4,4)
+        end
     end
 end
 
