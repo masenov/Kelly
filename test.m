@@ -15,7 +15,7 @@ while true
     % too close to the wall
     if (av_sensors(5) > high_threshold*1.5)
         sharpness = calculateTurn(av_sensors(5),high_threshold*1.5,high_threshold*1.5*2);
-        if (sum(speed == [sharpness,6] < 1))
+        if (sum(speed == [sharpness,4] < 1))
             speed = [sharpness,4];
             turn(s,sharpness,4);
         end
