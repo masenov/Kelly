@@ -1,4 +1,4 @@
-turn(s,4,4);
+turn(s,2,2);
 path_clear = 1;
 low_threshold = 50;
 high_threshold = 75;
