@@ -14,8 +14,7 @@ end
 while (av_sensors(8) < 150)
     [sensors,av_sensors] = readIRAV(s,av_sensors);
     % Obstacle in front
-    % We shouldn't use the third sensor, otherwise we keep fluctuating
-    % between "Obstacle in front" and "Too far away from the wall"
+    % We use only the fourth sensor, rather than 
     if (av_sensors(4) > high_threshold)
         % Turn left in place
         speed = [-4,4];
