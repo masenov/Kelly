@@ -1,6 +1,7 @@
+
 path_clear = 1;
-low_threshold = 50;
-high_threshold = 75;
+low_threshold = 40;
+high_threshold = 65;
 
 %reset counts
 sensors = zeros(1,8);
@@ -8,20 +9,24 @@ av_sensors = sensors;
 x = 0;
 y = 0;
 phi = 0;
+counts = [0,0];
 setCounts(s, 0, 0);
-turn(s,4,4);
-map = ones(801,801);
-
-while (av_sensors(8) < 150)
+global_speed = 3;
+go(s,global_speed);
+map = ones(401,401);
+countdown = 0;
+while (av_sensors(8) < 300)
     
     [sensors, av_sensors] = readIRAV(s,av_sensors);
     counts = readCounts(s);
-    setCounts(s, 0, 0);
-    x = x + (0.5*(counts(1) + counts(2))*cos((phi/180)*3.1428))/80;
-    y = y + (0.5*(counts(1) + counts(2))*sin((phi/180)*3.1428))/80;
-    phi = mod(phi - 0.5*(counts(1) - counts(2))/4.2,360);
-    map(400 + round(x),400 + round(y)) = 0;
-    [x y phi]
+    if (counts(1) + counts(2) > 400)
+        [x,y,phi,countdown,map] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map);
+        if countdown > global_speed*4400
+            break;
+        end
+    end
+    phi
+%    [x y phi]
 %   Calibrate angle
 %     if (phi < 5)
 %         go(s,0);
@@ -29,40 +34,42 @@ while (av_sensors(8) < 150)
 %         break;
 %     end
     if path_clear
-        if (av_sensors(3) > high_threshold || av_sensors(4) > high_threshold)
+        if (av_sensors(4) > high_threshold)
             path_clear = 0;
         end
     else
         % Obstacle in front
-        if (av_sensors(3) > high_threshold || av_sensors(4) > high_threshold)
+        % We shouldn't use the third sensor, otherwise we keep fluctuating
+        % between "Obstacle in front" and "Too far away from the wall"
+        if (av_sensors(4) > high_threshold)
             % Turn left in place
-            speed = [-4,4];
-            turn(s,-4,4);
+            speed = [-global_speed,global_speed];
+            turn(s,-global_speed,global_speed);
         % Too close to the wall
-        elseif (av_sensors(5) > high_threshold*1.5 || av_sensors(6) > high_threshold*1.5)
+        elseif (av_sensors(6) > high_threshold*1.5)
             % Turn left curved
-            sharpness = calculateTurn(av_sensors(5),high_threshold*1.5,high_threshold*1.5*2);
-            if (sum(speed == [sharpness,4] < 1))
-                speed = [sharpness,4];
-                turn(s,sharpness,4);
+            sharpness = calculateTurn(av_sensors(6),high_threshold*1.5,high_threshold*1.5*2,global_speed);
+            if (sum(speed == [sharpness,global_speed] < 1))
+                speed = [sharpness,global_speed];
+                turn(s,sharpness,global_speed);
             end
         % Too far away from the wall
-        elseif (av_sensors(5) < low_threshold*1.5 || av_sensors(6) < low_threshold*1.5)
+        elseif (av_sensors(6) < low_threshold*1.5)
             % Turn right curved
-            sharpness = calculateTurn(av_sensors(6),0,low_threshold*1.5);
-            if (sum(speed == [4,sharpness] < 1))
-                speed = [4,sharpness];
-                turn(s,4,sharpness);
+            sharpness = calculateTurn(av_sensors(6),0,low_threshold*1.5,global_speed);
+            if (sum(speed == [global_speed,sharpness] < 1))
+                speed = [global_speed,sharpness];
+                turn(s,global_speed,sharpness);
             end
         % Keep straight
         else
-            if (sum(speed == [4,4] < 1))
-                speed = [4,4];
-                turn(s,4,4)
+            if (sum(speed == [global_speed,global_speed] < 1))
+                speed = [global_speed,global_speed];
+                go(s,global_speed);
             end
         end
     end
-    imshow(map);
+    %imshow(flipdim(flipdim(map,1),2));
     
 end
 go(s,0);
