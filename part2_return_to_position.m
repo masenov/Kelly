@@ -34,22 +34,12 @@ while (av_sensors(8) < 300)
 
 end
 go(s,0);
-readCounts(s);
-direction = rad2deg(atan2(y,x))+180;
-turn(s,-4,4);
-while (abs(phi-direction)>3 && av_sensors(8) < 300)
-    if (abs(phi-direction)<20)
-        turn(s,-1,1);
-    end
-    pause(0.07);
-    counts = readCounts(s);
-    [x,y,phi,countdown,map] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map);
-    phi
-end
+[x,y,phi] = calculateAngle(s,x,y,phi,map);
 go(s,2);
-while (abs(x) + abs(y) > 2)
+while (abs(x) + abs(y) > 4)
     pause(0.07);
     counts = readCounts(s);
     [x,y,phi,countdown,map] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map);
+    x,y
 end
 stop(s);
