@@ -1,4 +1,4 @@
-function [x,y,phi] = calculateAngle(s,x,y,phi,map)
+function [x,y,phi,current_time] = calculateAngle(s,x,y,phi,map,current_time)
     direction = rad2deg(atan2(y,x))+180;
     speed = 0;
     phi, direction
@@ -12,6 +12,6 @@ function [x,y,phi] = calculateAngle(s,x,y,phi,map)
         end
         pause(0.07);
         counts = readCounts(s);
-        [x,y,phi,~,map] = calculateOdometry(s,counts(1),counts(2),x,y,phi,0,map);
+        [x,y,phi,~,map,current_time] = calculateOdometry(s,counts(1),counts(2),x,y,phi,0,map,current_time);
     end
 end

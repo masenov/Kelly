@@ -69,7 +69,7 @@ while (av_sensors(8) < 300)
             end
         end
     end
-    %imshow(flipdim(flipdim(map,1),2));
+    imshow(flipdim(flipdim(map,1),2));
     
 end
 go(s,0);

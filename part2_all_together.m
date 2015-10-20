@@ -9,18 +9,19 @@ av_sensors = sensors;
 x = 0;
 y = 0;
 phi = 0;
-counts = [0,0];
 setCounts(s, 0, 0);
 global_speed = 3;
 go(s,global_speed);
+current_time = clock;
 map = ones(401,401);
 countdown = 0;
 while (av_sensors(8) < 300)
     
     [sensors, av_sensors] = readIRAV(s,av_sensors);
     counts = readCounts(s);
-    if (counts(1) + counts(2) > 400)
-        [x,y,phi,countdown,map] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map);
+    cl = clock;
+    if (abs(cl(6) - current_time(6)) > 0.1)
+        [x,y,phi,countdown,map,current_time] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map,current_time);
         if countdown > global_speed*4400
             break;
         end
@@ -68,24 +69,26 @@ while (av_sensors(8) < 300)
             end
         end
     end
-    %imshow(flipdim(flipdim(map,1),2));
-    
+    %imshow(flipdim(flipdim(map,1),2))
+    %imshow(map)
 end
 stop(s);
 
 
-[x,y,phi] = calculateAngle(s,x,y,phi,map);
+[x,y,phi,current_time] = calculateAngle(s,x,y,phi,map,current_time);
 go(s,global_speed);
 speed = [global_speed,global_speed];
 counts = readCounts(s);
 while (abs(x) + abs(y) > 4)
+    %imshow(map)
     [sensors, av_sensors] = readIRAV(s,av_sensors);
-    [x,y,phi] = calculateAngle(s,x,y,phi,map); 
+    [x,y,phi,current_time] = calculateAngle(s,x,y,phi,map,current_time); 
     go(s,global_speed);
     while (av_sensors(4) < high_threshold && abs(x) + abs(y) > 4)
         counts = readCounts(s);
-        if (counts(1) + counts(2) > 400)
-            [x,y,phi,countdown,map] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map);
+        cl = clock;
+        if (abs(cl(6) - current_time(6)) > 0.1)
+            [x,y,phi,countdown,map,current_time] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map,current_time);
         end
         [sensors, av_sensors] = readIRAV(s,av_sensors);
     end
@@ -93,16 +96,18 @@ while (abs(x) + abs(y) > 4)
         turn(s,-global_speed,global_speed);
         while (av_sensors(4) > high_threshold)
             counts = readCounts(s);
-            if (counts(1) + counts(2) > 400)
-                [x,y,phi,countdown,map] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map);
+            cl = clock;
+            if (abs(cl(6) - current_time(6)) > 0.1)
+                [x,y,phi,countdown,map,current_time] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map,current_time);
             end
             [sensors, av_sensors] = readIRAV(s,av_sensors);
         end
         angle = phi;
-        while (abs(angle-phi) < 135)
+        while (abs(angle-phi) < 70)
             counts = readCounts(s);
-            if (counts(1) + counts(2) > 400)
-                [x,y,phi,countdown,map] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map);
+            cl = clock;
+            if (abs(cl(6) - current_time(6)) > 0.1)
+                [x,y,phi,countdown,map,current_time] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map,current_time);
             end
             [sensors, av_sensors] = readIRAV(s,av_sensors);
             % Obstacle in front
@@ -140,11 +145,10 @@ while (abs(x) + abs(y) > 4)
     
     pause(0.07);
     counts = readCounts(s);
-    [x,y,phi,countdown,map] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map);
+    [x,y,phi,countdown,map,current_time] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map,current_time);
 end
 stop(s);
-
-
+imshow(flipdim(flipdim(map,1),2));
 
 
 
