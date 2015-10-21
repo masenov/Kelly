@@ -24,7 +24,7 @@ while (av_sensors(8) < 300)
     cl = clock;
     if (abs(cl(6) - current_time(6)) > 0.5)
         [x,y,phi,countdown,map,current_time] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map,current_time);
-        if countdown > global_speed*9000
+        if countdown > global_speed*400
             break;
         end
     end
