@@ -19,22 +19,13 @@ map = ones(401,401);
 countdown = 0;
 while (av_sensors(8) < 300)
     
-    [sensors, av_sensors] = readIRAV(s,av_sensors);
-    counts = readCounts(s);
-    cl = clock;
+    
     if (abs(cl(6) - current_time(6)) > 0.5)
         [x,y,phi,countdown,map,current_time] = calculateOdometry(s,counts(1),counts(2),x,y,phi,countdown,map,current_time);
-        if countdown > global_speed*9000
+        if countdown > global_speed*400
             break;
         end
     end
-%    [x y phi]
-%   Calibrate angle
-%     if (phi < 5)
-%         go(s,0);
-%         readCounts(s);
-%         break;
-%     end
     if path_clear
         if (av_sensors(4) > high_threshold)
             path_clear = 0;
