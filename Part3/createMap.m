@@ -1,4 +1,6 @@
-%create a map that's 18x10 (with a border of walls).  Each cell is 7.5x7.5cm
+function map = createMap()
+
+%create a map that is 18x10 (with a border of walls).  Each cell is 7.5x7.5cm
 
 xboundary = 20;
 yboundary = 12;
@@ -83,4 +85,19 @@ map(11,13) = blocked;
 map(11,14) = blocked;
 map(11,15) = blocked;
 
+
+%mark all non-obstacle regions as unvisited
+
+unvisited = 1;
+
+for i=1:yboundary
+	for j=1:xboundary
+		if map(i,j) ~= blocked 
+			map(i,j) = unvisited;
+		end
+	end
+end
+		
 map
+
+end
