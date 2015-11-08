@@ -96,7 +96,7 @@ for i=1:yboundary
 		end
 	end
 end
-	
+
 %display the map
 imagesc(map)
 set(gca, 'Ydir', 'Normal')
