@@ -87,7 +87,6 @@ map(11,15) = blocked;
 
 
 %mark all non-obstacle regions as unvisited
-
 unvisited = 1;
 
 for i=1:yboundary
@@ -97,7 +96,9 @@ for i=1:yboundary
 		end
 	end
 end
-		
-map
+	
+%display the map
+imagesc(map)
+set(gca, 'Ydir', 'Normal')
 
 end
