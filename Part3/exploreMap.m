@@ -13,7 +13,7 @@ currPos = home;
 if map(currPos(1), currPos(2)) == 1 
     %move forward 1
 end
-%elseif map(currPos
+%elseif right 
 
 %when not adjacent to any 1s, look for nearest 1
 
